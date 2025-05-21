@@ -205,6 +205,7 @@
     </form>
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Buscar por nome ou documento...">
+      <button type="button" onclick="buscarPorNomeOuDocumento()">Buscar</button>
       <button type="button" onclick="exportarCSV()">Exportar CSV</button>
       <button type="button" onclick="exportarPDF()">Exportar PDF</button>
     </div>
@@ -390,6 +391,12 @@
     document.getElementById('searchInput').oninput = function() {
       renderizarTabela(this.value);
     };
+
+    // Botão de busca
+    function buscarPorNomeOuDocumento() {
+      const valor = document.getElementById('searchInput').value;
+      renderizarTabela(valor);
+    }
 
     // Exportar CSV
     function exportarCSV() {

@@ -125,6 +125,34 @@
     .btn-baixa:hover {
       background: #b71c1c;
     }
+    .img-ampliada-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .img-ampliada-bg img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 10px;
+      box-shadow: 0 2px 20px #000a;
+      background: #fff;
+      padding: 8px;
+    }
+    .img-ampliada-bg .fechar {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 2em;
+      color: #fff;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 10000;
+    }
     @media (max-width: 800px) {
       .container { padding: 10px 2px; }
       form { flex-direction: column; gap: 10px; }
@@ -180,19 +208,23 @@
       <div class="form-group photo-section">
         <label>Foto Frente</label>
         <video id="videoFrente" width="120" height="90" autoplay playsinline style="display:none;"></video>
-        <img id="fotoFrentePreview" class="photo-preview" src="" alt="Foto Frente">
+        <img id="fotoFrentePreview" class="photo-preview" src="" alt="Foto Frente" onclick="ampliarFoto(this)">
         <div class="actions">
           <button type="button" onclick="abrirCamera('frente')">Abrir Câmera</button>
           <button type="button" onclick="tirarFoto('frente')">Tirar Foto</button>
+          <input type="file" accept="image/*" style="display:none;" id="fileFrente" onchange="carregarArquivoFoto(event, 'frente')">
+          <button type="button" onclick="document.getElementById('fileFrente').click()">Arquivo</button>
         </div>
       </div>
       <div class="form-group photo-section">
         <label>Foto Verso</label>
         <video id="videoVerso" width="120" height="90" autoplay playsinline style="display:none;"></video>
-        <img id="fotoVersoPreview" class="photo-preview" src="" alt="Foto Verso">
+        <img id="fotoVersoPreview" class="photo-preview" src="" alt="Foto Verso" onclick="ampliarFoto(this)">
         <div class="actions">
           <button type="button" onclick="abrirCamera('verso')">Abrir Câmera</button>
           <button type="button" onclick="tirarFoto('verso')">Tirar Foto</button>
+          <input type="file" accept="image/*" style="display:none;" id="fileVerso" onchange="carregarArquivoFoto(event, 'verso')">
+          <button type="button" onclick="document.getElementById('fileVerso').click()">Arquivo</button>
         </div>
       </div>
       <div class="form-group">
@@ -346,8 +378,8 @@
           <td>${p.saida || ''}</td>
           <td>${p.empresa}</td>
           <td>${p.servico}</td>
-          <td>${p.fotoFrente ? '<img src="'+p.fotoFrente+'" style="width:40px;height:30px;object-fit:cover;border-radius:3px;">' : ''}</td>
-          <td>${p.fotoVerso ? '<img src="'+p.fotoVerso+'" style="width:40px;height:30px;object-fit:cover;border-radius:3px;">' : ''}</td>
+          <td>${p.fotoFrente ? `<img src="${p.fotoFrente}" style="width:40px;height:30px;object-fit:cover;border-radius:3px;cursor:pointer;" onclick="ampliarFoto(this)">` : ''}</td>
+          <td>${p.fotoVerso ? `<img src="${p.fotoVerso}" style="width:40px;height:30px;object-fit:cover;border-radius:3px;cursor:pointer;" onclick="ampliarFoto(this)">` : ''}</td>
           <td>${!p.saida ? `<button class='btn-baixa' onclick='darBaixa(${idx})'>Dar Baixa</button>` : ''}</td>
         `;
         tbody.appendChild(tr);
@@ -425,6 +457,33 @@
         if (y > 270) { doc.addPage(); y = 20; }
       });
       doc.save('prestadores.pdf');
+    }
+
+    // Ampliar foto
+    function ampliarFoto(img) {
+      if (!img.src) return;
+      const bg = document.createElement('div');
+      bg.className = 'img-ampliada-bg';
+      bg.innerHTML = `<button class='fechar' onclick='this.parentNode.remove()' title='Fechar'>&times;</button><img src='${img.src}' alt='Foto Ampliada'>`;
+      document.body.appendChild(bg);
+      bg.onclick = function(e) { if (e.target === bg) bg.remove(); };
+    }
+
+    // Carregar arquivo de foto
+    function carregarArquivoFoto(event, tipo) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        if (tipo === 'frente') {
+          fotoFrente = e.target.result;
+          document.getElementById('fotoFrentePreview').src = fotoFrente;
+        } else {
+          fotoVerso = e.target.result;
+          document.getElementById('fotoVersoPreview').src = fotoVerso;
+        }
+      };
+      reader.readAsDataURL(file);
     }
 
     // Inicialização

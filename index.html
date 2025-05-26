@@ -243,6 +243,8 @@
       <button type="button" onclick="buscarPorNomeOuDocumento()">Buscar</button>
       <button type="button" onclick="exportarCSV()">Exportar CSV</button>
       <button type="button" onclick="exportarPDF()">Exportar PDF</button>
+      <button type="button" onclick="salvarPrestadores()" style="background:#388e3c;">Salvar Registros</button>
+      <button type="button" onclick="abrirRelatorio()" style="background:#ff9800;">Relatório</button>
     </div>
     <div style="overflow-x:auto;">
       <table id="tabelaPrestadores">
@@ -388,7 +390,8 @@
           <td>${p.servico}</td>
           <td>${p.fotoFrente ? `<img src="${p.fotoFrente}" style="width:40px;height:30px;object-fit:cover;border-radius:3px;cursor:pointer;" onclick="ampliarFoto(this)">` : ''}</td>
           <td>${p.fotoVerso ? `<img src="${p.fotoVerso}" style="width:40px;height:30px;object-fit:cover;border-radius:3px;cursor:pointer;" onclick="ampliarFoto(this)">` : ''}</td>
-          <td>${!p.saida ? `<button class='btn-baixa' onclick='darBaixa(${idx})'>Dar Baixa</button>` : ''}</td>
+          <td>${!p.saida ? `<button class='btn-baixa' onclick='darBaixa(${idx})'>Dar Baixa</button>` : ''}
+              <button class='btn' style='background:#1976d2;margin-left:4px;' onclick='editarPrestador(${idx})'>Editar</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -495,6 +498,40 @@
         }
       };
       reader.readAsDataURL(file);
+    }
+
+    // Função para abrir relatório em nova janela
+    function abrirRelatorio() {
+      let rel = window.open('', '_blank');
+      rel.document.write('<html><head><title>Relatório de Prestadores</title><style>body{font-family:sans-serif;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #ccc;padding:6px;}th{background:#1976d2;color:#fff;}tr:nth-child(even){background:#f4f6f8;}</style></head><body>');
+      rel.document.write('<h2>Relatório de Prestadores de Serviço</h2>');
+      rel.document.write('<table><thead><tr><th>Apto</th><th>Nome</th><th>Documento</th><th>Autorizador</th><th>Entrada</th><th>Saída</th><th>Empresa</th><th>Serviço</th></tr></thead><tbody>');
+      prestadores.forEach(p => {
+        rel.document.write(`<tr><td>${p.apartamento}</td><td>${p.nome}</td><td>${p.documento}</td><td>${p.autorizador}</td><td>${p.entrada}</td><td>${p.saida || ''}</td><td>${p.empresa}</td><td>${p.servico}</td></tr>`);
+      });
+      rel.document.write('</tbody></table></body></html>');
+      rel.document.close();
+    }
+
+    // Função para editar prestador
+    function editarPrestador(idx) {
+      const p = prestadores[idx];
+      document.getElementById('apartamento').value = p.apartamento;
+      document.getElementById('nome').value = p.nome;
+      document.getElementById('documento').value = p.documento;
+      document.getElementById('autorizador').value = p.autorizador;
+      document.getElementById('entrada').value = p.entrada.replace(' ', 'T');
+      document.getElementById('saida').value = p.saida ? p.saida.replace(' ', 'T') : '';
+      document.getElementById('empresa').value = p.empresa;
+      document.getElementById('servico').value = p.servico;
+      fotoFrente = p.fotoFrente;
+      fotoVerso = p.fotoVerso;
+      document.getElementById('fotoFrentePreview').src = fotoFrente;
+      document.getElementById('fotoVersoPreview').src = fotoVerso;
+      // Remove o registro antigo para evitar duplicidade ao salvar
+      prestadores.splice(idx, 1);
+      salvarPrestadores();
+      renderizarTabela(document.getElementById('searchInput').value);
     }
 
     // Inicialização

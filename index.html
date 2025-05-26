@@ -265,29 +265,6 @@
       </table>
     </div>
   </div>
-  <div id="loginModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10000;">
-    <div style="display:flex;flex-direction:row;gap:40px;align-items:flex-start;">
-      <form id="loginForm" style="background:#fff;padding:30px 20px;border-radius:10px;box-shadow:0 2px 10px #0003;min-width:300px;display:flex;flex-direction:column;gap:15px;">
-        <h2 style="margin:0 0 10px 0;text-align:center;color:#1976d2;">Login</h2>
-        <label for="loginUser">Usuário</label>
-        <input type="text" id="loginUser" required autocomplete="username">
-        <label for="loginPass">Senha</label>
-        <input type="password" id="loginPass" required autocomplete="current-password">
-        <button type="submit">Entrar</button>
-        <div id="loginErro" style="color:#e53935;text-align:center;display:none;">Usuário ou senha inválidos!</div>
-      </form>
-      <form id="cadastroUsuarioForm" style="background:#fff;padding:30px 20px;border-radius:10px;box-shadow:0 2px 10px #0003;min-width:300px;display:flex;flex-direction:column;gap:15px;">
-        <h2 style="margin:0 0 10px 0;text-align:center;color:#388e3c;">Cadastrar Usuário</h2>
-        <label for="novoUser">Novo Usuário</label>
-        <input type="text" id="novoUser" required autocomplete="username">
-        <label for="novoPass">Senha</label>
-        <input type="password" id="novoPass" required autocomplete="new-password">
-        <button type="submit">Cadastrar</button>
-        <div id="cadastroUsuarioMsg" style="color:#388e3c;text-align:center;display:none;">Usuário cadastrado!</div>
-        <div id="cadastroUsuarioErro" style="color:#e53935;text-align:center;display:none;">Usuário já existe!</div>
-      </form>
-    </div>
-  </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     let streamAtual = null;
@@ -296,25 +273,10 @@
     let fotoFrente = '';
     let fotoVerso = '';
     let prestadores = [];
-    let usuarioLogado = null;
-    // Usuários de exemplo (adicione mais conforme necessário)
-    let usuarios = [
-      { usuario: 'admin', senha: '1234' },
-      { usuario: 'porteiro', senha: '1234' }
-    ];
-    // Carregar usuários do localStorage
-    function carregarUsuarios() {
-      const dados = localStorage.getItem('usuarios');
-      if (dados) usuarios = JSON.parse(dados);
-    }
-    // Salvar usuários no localStorage
-    function salvarUsuarios() {
-      localStorage.setItem('usuarios', JSON.stringify(usuarios));
-    }
 
     // Função para obter a chave de storage do usuário
     function storageKey() {
-      return 'prestadores_' + usuarioLogado;
+      return 'prestadores';
     }
 
     // Salvar no localStorage
@@ -327,43 +289,6 @@
       const dados = localStorage.getItem(storageKey());
       prestadores = dados ? JSON.parse(dados) : [];
     }
-
-    // Cadastro de novo usuário
-    document.getElementById('cadastroUsuarioForm').onsubmit = function(e) {
-      e.preventDefault();
-      const novoUser = document.getElementById('novoUser').value.trim();
-      const novoPass = document.getElementById('novoPass').value;
-      if (!novoUser || !novoPass) return;
-      if (usuarios.find(u => u.usuario === novoUser)) {
-        document.getElementById('cadastroUsuarioErro').style.display = 'block';
-        document.getElementById('cadastroUsuarioMsg').style.display = 'none';
-        return;
-      }
-      usuarios.push({ usuario: novoUser, senha: novoPass });
-      salvarUsuarios();
-      document.getElementById('cadastroUsuarioMsg').style.display = 'block';
-      document.getElementById('cadastroUsuarioErro').style.display = 'none';
-      document.getElementById('cadastroUsuarioForm').reset();
-    };
-
-    // Login
-    document.getElementById('loginForm').onsubmit = function(e) {
-      e.preventDefault();
-      const user = document.getElementById('loginUser').value.trim();
-      const pass = document.getElementById('loginPass').value;
-      if (!user || !pass) return;
-      carregarUsuarios(); // <-- garantir que está atualizado
-      const ok = usuarios.find(u => u.usuario === user && u.senha === pass);
-      if (ok) {
-        usuarioLogado = user;
-        carregarPrestadores();
-        salvarPrestadores(); // <-- garantir que a chave existe
-        document.getElementById('loginModal').style.display = 'none';
-        renderizarTabela();
-      } else {
-        document.getElementById('loginErro').style.display = 'block';
-      }
-    };
 
     // Carregar câmeras disponíveis
     async function carregarCameras() {
@@ -574,10 +499,9 @@
 
     // Inicialização
     window.onload = async function() {
-      carregarUsuarios();
-      document.getElementById('loginModal').style.display = 'flex';
       await carregarCameras();
-      // Não carrega registros até login
+      carregarPrestadores();
+      renderizarTabela();
     };
   </script>
 </body>

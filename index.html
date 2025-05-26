@@ -500,6 +500,9 @@
       fotoVerso = '';
       document.getElementById('fotoFrentePreview').src = '';
       document.getElementById('fotoVersoPreview').src = '';
+      // Limpa campos de data/hora para evitar valores antigos
+      document.getElementById('entrada').value = '';
+      document.getElementById('saida').value = '';
     };
 
     // Busca

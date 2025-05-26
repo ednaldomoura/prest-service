@@ -325,13 +325,14 @@
         streamAtual.getTracks().forEach(track => track.stop());
       }
       const select = document.getElementById('cameraSelect');
-      const deviceId = select.value;
       let constraints = {};
-      if (deviceId) {
+      // Tenta priorizar a câmera traseira em dispositivos móveis
+      if (select.options.length > 0 && select.selectedIndex >= 0) {
+        const deviceId = select.value;
         constraints = { video: { deviceId: { exact: deviceId } } };
       } else {
         // fallback para traseira em mobile
-        constraints = { video: { facingMode: { exact: 'environment' } } };
+        constraints = { video: { facingMode: { ideal: 'environment' } } };
       }
       try {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -341,7 +342,7 @@
         video.style.display = 'block';
         video.play();
       } catch (e) {
-        alert('Erro ao acessar a câmera!');
+        alert('Erro ao acessar a câmera!\nVerifique as permissões do navegador e se o dispositivo possui câmera traseira disponível.');
       }
     }
 
